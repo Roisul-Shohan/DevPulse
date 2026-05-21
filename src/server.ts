@@ -8,3 +8,5 @@ import { initDB } from "./db";
         console.log(`Server running on port ${config.PORT}`);
     })
 })()
+
+
