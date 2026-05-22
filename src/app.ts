@@ -2,6 +2,7 @@ import  express, {type NextFunction, type Request, type Response }  from "expres
 import cors from "cors";
 import globalErrorHandler from "./middlewares/globalErrorHandler";
 import { authRouter } from "./modules/auth/auth.route";
+import { issueRouter } from "./modules/issue/issue.route";
 
 const app =express();
 
@@ -17,6 +18,7 @@ app.get("/", (req: Request,res:Response ) => {
 });
 
 app.use("/api/auth",authRouter);
+app.use("/api/issues",issueRouter);
 
 
 app.use((req: Request, res: Response, next: NextFunction) => {
