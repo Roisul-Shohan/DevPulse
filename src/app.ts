@@ -1,6 +1,7 @@
 import  express, {type NextFunction, type Request, type Response }  from "express";
 import cors from "cors";
 import globalErrorHandler from "./middlewares/globalErrorHandler";
+import { authRouter } from "./modules/auth/auth.route";
 
 const app =express();
 
@@ -14,6 +15,8 @@ app.get("/", (req: Request,res:Response ) => {
 
     res.send("DevPulse Server Running") ;
 });
+
+app.use("/api/auth",authRouter);
 
 
 app.use((req: Request, res: Response, next: NextFunction) => {
