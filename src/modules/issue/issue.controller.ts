@@ -1,6 +1,6 @@
 import type { Request,Response } from "express";
 import catchAsync from "../../utils/catchAsync";
-import { createIssueIntoDB, getAllIssuesFromDB, getReporterById, getSingleIssueFromDB } from "./issue.service";
+import { createIssueIntoDB, getAllIssuesFromDB, getReporterById, getSingleIssueFromDB, updateIssueIntoDB } from "./issue.service";
 import sendResponse from "../../utils/sendResponse";
 
 
@@ -80,5 +80,62 @@ export const getSingleIssue = catchAsync(
       message: "Issue retrieved successfully",
       data: enrichedIssue,
     });
+  }
+);
+
+export const updateIssue = catchAsync(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    const issue = await getSingleIssueFromDB(id as string);
+
+    if (!issue) {
+      return sendResponse(res, {
+        statusCode: 404,
+        success: false,
+        message: "Issue not found",
+      });
+    }
+
+    const User = req.user;
+
+    if (User?.role === "maintainer") {
+      const result = await updateIssueIntoDB(id as string, req.body);
+
+      return sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Issue updated successfully",
+        data: result,
+      });
+    }
+
+    if (User?.role === "contributor") {
+      
+      if (issue.reporter_id !== User.id) {
+        return sendResponse(res, {
+          statusCode: 403,
+          success: false,
+          message: "You can update only your own issues",
+        });
+      }
+
+      if (issue.status !== "open") {
+        return sendResponse(res, {
+          statusCode: 403,
+          success: false,
+          message: "You can update issue only when status is open",
+        });
+      }
+
+      const result = await updateIssueIntoDB(id as string, req.body);
+
+      return sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Issue updated successfully",
+        data: result,
+      });
+    }
   }
 );

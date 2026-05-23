@@ -1,9 +1,9 @@
 import { pool } from "../../db";
 import AppError from "../../errors/AppErrors";
-import type { TIssuePayload } from "./issue.interface";
+import type { IssuePayload, IUpdateIssue } from "./issue.interface";
 
 
-export const createIssueIntoDB = async (payload: TIssuePayload,id :number) => {
+export const createIssueIntoDB = async (payload: IssuePayload,id :number) => {
     
     const {title,description,type}=payload;
 
@@ -103,3 +103,22 @@ export const getSingleIssueFromDB = async (id: string) => {
   const result = await pool.query(query, [id]);
   return result.rows[0];
 };
+
+export const updateIssueIntoDB = async (
+  id: string,
+  payload: IUpdateIssue
+) => {
+
+    const {title,description,type} =payload;
+
+    const updateIssue = await pool.query(`
+        UPDATE issues SET 
+            title = COALESCE($1,title),
+            description = COALESCE($2,description),
+            type = COALESCE($3,type),
+            updated_at = NOW()
+        WHERE id = $4  RETURNING *
+        `,[title,description,type,id])
+
+    return updateIssue.rows[0];
+}
