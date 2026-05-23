@@ -1,6 +1,6 @@
 import type { Request,Response } from "express";
 import catchAsync from "../../utils/catchAsync";
-import { createIssueIntoDB, getAllIssuesFromDB, getReporterById, getSingleIssueFromDB, updateIssueIntoDB } from "./issue.service";
+import { createIssueIntoDB, deleteIssueFromDB, getAllIssuesFromDB, getReporterById, getSingleIssueFromDB, updateIssueIntoDB } from "./issue.service";
 import sendResponse from "../../utils/sendResponse";
 
 
@@ -137,5 +137,37 @@ export const updateIssue = catchAsync(
         data: result,
       });
     }
+  }
+);
+
+export const deleteIssue = catchAsync(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    const issue = await getSingleIssueFromDB(id as string);
+
+    if (!issue) {
+      return sendResponse(res, {
+        statusCode: 404,
+        success: false,
+        message: "Issue not found",
+      });
+    }
+
+    if (req.user?.role !== "maintainer") {
+      return sendResponse(res, {
+        statusCode: 403,
+        success: false,
+        message: "Only maintainers can delete issues",
+      });
+    }
+
+    await deleteIssueFromDB(id as string);
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Issue deleted successfully",
+    });
   }
 );

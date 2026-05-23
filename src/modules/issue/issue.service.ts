@@ -122,3 +122,12 @@ export const updateIssueIntoDB = async (
 
     return updateIssue.rows[0];
 }
+
+export const deleteIssueFromDB = async (id: string) => {
+   
+    await pool.query(`
+    DELETE FROM issues
+    WHERE id = $1
+  `,[id]);
+  
+};
