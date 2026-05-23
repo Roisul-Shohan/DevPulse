@@ -1,6 +1,6 @@
 import type { Request,Response } from "express";
 import catchAsync from "../../utils/catchAsync";
-import { createIssueIntoDB, getAllIssuesFromDB } from "./issue.service";
+import { createIssueIntoDB, getAllIssuesFromDB, getReporterById, getSingleIssueFromDB } from "./issue.service";
 import sendResponse from "../../utils/sendResponse";
 
 
@@ -37,6 +37,48 @@ export const getAllIssues = catchAsync(
       success: true,
       message: "Issues retrieved successfully",
       data: result,
+    });
+  }
+);
+
+export const getSingleIssue = catchAsync(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    const issue = await getSingleIssueFromDB(id as string);
+
+    if (!issue) {
+      return sendResponse(res, {
+        statusCode: 404,
+        success: false,
+        message: "Issue not found",
+      });
+    }
+
+    const reporter = await getReporterById(issue.reporter_id);
+
+    const enrichedIssue = {
+                    id: issue.id,
+                    title: issue.title,
+                    description: issue.description,
+                    type: issue.type,
+                    status: issue.status,
+
+                    reporter: {
+                        id: reporter.id,
+                        name: reporter.name,
+                        role: reporter.role
+                    },
+
+                    created_at: issue.created_at,
+                    updated_at: issue.updated_at
+                }
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Issue retrieved successfully",
+      data: enrichedIssue,
     });
   }
 );

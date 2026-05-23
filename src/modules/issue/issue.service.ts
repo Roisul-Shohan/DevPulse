@@ -93,3 +93,13 @@ export const getReporterById = async (id: number) => {
 
     return result.rows[0];
 };
+
+
+export const getSingleIssueFromDB = async (id: string) => {
+  const query = `
+    SELECT * FROM issues WHERE id = $1
+  `;
+
+  const result = await pool.query(query, [id]);
+  return result.rows[0];
+};
