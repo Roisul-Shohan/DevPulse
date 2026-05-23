@@ -1,6 +1,6 @@
 import type { Request,Response } from "express";
 import catchAsync from "../../utils/catchAsync";
-import { createIssueIntoDB } from "./issue.service";
+import { createIssueIntoDB, getAllIssuesFromDB } from "./issue.service";
 import sendResponse from "../../utils/sendResponse";
 
 
@@ -21,3 +21,22 @@ export const CreateIssue = catchAsync(
 
     }
 )
+
+export const getAllIssues = catchAsync(
+  async (req: Request, res: Response) => {
+    const { sort, type, status } = req.query;
+
+    const result = await getAllIssuesFromDB(
+      sort as string,
+      type as string,
+      status as string
+    );
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Issues retrieved successfully",
+      data: result,
+    });
+  }
+);
